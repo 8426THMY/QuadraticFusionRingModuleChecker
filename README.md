@@ -1,5 +1,5 @@
 # Haagerup-Izumi Module Checker
-This program looks for special modules (so-called "NIM-reps") over Haagerup-Izumi-like fusion rings. Let $G$ be a finite Abelian group, $Q \leq G$ a subgroup and $\psi : G \to G$ an order-two group automorphism. From this data, we construct a ring with generators $\{g\}_{g \in G} \sqcup \{gX\}_{g \in G}$ and fusion rules
+This program looks for special modules (so-called "NIM-reps") over Haagerup-Izumi-like fusion rings. Let $G$ be a finite Abelian group, $Q \leq G$ a subgroup and $\psi : G \to G$ an order-two group automorphism. From this data, we construct a ring with generators $\\{g\\}\_{g \in G} \sqcup \\{gX\\}\_{g \in G}$ and fusion rules
 
 $$g \otimes X = gX, \quad X \otimes g = \psi(g)X, \quad X \otimes X = 𝟙 \oplus \bigoplus_{q \in Q}{qX}.$$
 
