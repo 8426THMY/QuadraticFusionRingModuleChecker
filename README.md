@@ -1,5 +1,5 @@
 # Quadratic Fusion Ring Module Checker
-This program looks for special modules (so-called "NIM-reps") over quadratic fusion rings. Currently, we only support quadratic fusion rings over finite Abelian groups and whose non-invertible generators have irrational Frobenius-Perron dimension. Such rings are determined by a finite Abelian group $G$, a subgroup $Q \leq G$, an order-two group automorphism $\psi : G/Q \to G/Q$, an fixed point $r(Q) \in G/Q$ of $\psi$ and non-negative integers $\\{m\_{gQ}\}}\_{gQ \in G/Q}$ satisfying $m\_{g^{-1}r(Q)} = m\_{gQ}$ and $m\_{g\psi(hQ)} = m\_{ghQ}$ for all $gQ, hQ \in G/Q$.
+This program looks for special modules (so-called "NIM-reps") over quadratic fusion rings. Currently, we only support quadratic fusion rings over finite Abelian groups and whose non-invertible generators have irrational Frobenius-Perron dimension. Such rings are determined by a finite Abelian group $G$, a subgroup $Q \leq G$, an order-two group automorphism $\psi : G/Q \to G/Q$, an fixed point $r(Q) \in G/Q$ of $\psi$ and non-negative integers $\\{m\_{gQ}\\}\_{gQ \in G/Q}$ satisfying $m\_{g^{-1}r(Q)} = m\_{gQ}$ and $m\_{g\psi(hQ)} = m\_{ghQ}$ for all $gQ, hQ \in G/Q$.
 
 Given the data described above, we obtain a quadratic fusion ring $R$ with generators $\\{g\\}\_{g \in G} \sqcup \\{X\_{gQ}\\}\_{gQ \in G/Q}$ and fusion rules
 
@@ -38,7 +38,7 @@ Currently, the program does not compute the subgroups of $G$ by itself, so they 
 
 $$g_{\textnormal{id}} = \sum_{i=1}^{n}{g_i\prod_{j=1}^{i-1}{p_j^{e_j}}}.$$
 
-The order of these cyclic factors is determined by the order of declaration in the ring file. Finally, `Q_index` is simply the (zero-based) index of $Q$ in the list of subgroups, `psi_gi` is the index of any element of $\psi(g_i Q)$ where $g_i$ is the $i$-th group element (ordered as above), `r(Q)` is the index of any element of $r(Q)$ and `m_gi` is the value of $m\_{gQ} \in \mathbb{Z}\_{\geq 0}$.
+The order of these cyclic factors is determined by the order of declaration in the ring file. Finally, `Q_index` is simply the (zero-based) index of $Q$ in the list of subgroups, `psi_gi` is the index of any element of $\psi(g_i Q)$ where $g_i$ is the $i$-th group element (ordered as above), `r(Q)` is the index of any element of $r(Q)$ and `m_gi` is the value of $m\_{g_i Q} \in \mathbb{Z}\_{\geq 0}$.
 
 
 ## Output
