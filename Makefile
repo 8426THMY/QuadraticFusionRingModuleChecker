@@ -1,9 +1,9 @@
 CC=gcc
 CFLAGS=-Wall -pedantic -O3 -Isrc
 ifeq ($(OS), Windows_NT)
-	EXE=bin/haagerup_algebra_checker.exe
+	EXE=bin/quadratic_module_checker.exe
 else
-	EXE=bin/haagerup_algebra_checker
+	EXE=bin/quadratic_module_checker
 endif
 
 SRC=$(wildcard src/*.c)
