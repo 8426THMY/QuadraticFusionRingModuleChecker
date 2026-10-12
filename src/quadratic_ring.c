@@ -14,9 +14,9 @@
 static int compute_psi_subgroups(quadratic_ring *const R);
 
 static void print_module_matrix(
-	const group *const G,
-	const subgroup *const H1, const integer_t *const a,
-	const subgroup *const H2, const integer_t *const x
+	const quadratic_module *const M,
+	const quadratic_ring *const R,
+	const size_t orbit
 );
 
 
@@ -269,6 +269,10 @@ int quadratic_ring_load(quadratic_ring *const R, const char *const path){
 				);
 				return 0;
 			}
+			puts(
+				"The dimension FPdim(X_Q) is not irrational, "
+				"so we may miss modules with more than two orbits."
+			);
 		}else{
 			R->d = 0;
 		}
@@ -385,12 +389,11 @@ void quadratic_module_print(
 	const quadratic_ring *const R
 ){
 
-	#if 0
-	print_module_matrix(&R->G, M->H1, M->a1, M->H2, M->x1);
-	printf("\n");
-	print_module_matrix(&R->G, M->H2, M->a2, M->H1, M->x2);
-	printf("\n\n");
-	#endif
+	size_t orbit;
+	for(orbit = 0; orbit < M->num_orbits; ++orbit){
+		print_module_matrix(M, R, orbit);
+		printf("\n");
+	}
 }
 
 void quadratic_module_delete(quadratic_module *const M){
@@ -466,38 +469,53 @@ static int compute_psi_subgroups(quadratic_ring *const R){
 
 
 static void print_module_matrix(
-	const group *const G,
-	const subgroup *const H1, const integer_t *const a,
-	const subgroup *const H2, const integer_t *const x
+	const quadratic_module *const M,
+	const quadratic_ring *const R,
+	const size_t i
 ){
 
-	#if 0
-	group_elem_id g;
-	// Print the rows corresponding to invertible objects.
-	for(g = 0; g < G->order; ++g){
-		size_t i;
-		for(i = 0; i < H1->quotient.num_cosets; ++i){
-			printf("%u ", H1->quotient.coset_ids[g] == i);
+	{
+		group_elem_id g;
+		// Print the rows corresponding to invertible objects.
+		for(g = 0; g < R->G.order; ++g){
+			size_t j;
+			for(j = 0; j < M->num_orbits; ++j){
+				const subgroup *const Hj = &R->G.subgroups[M->H_ids[j]];
+
+				size_t gHj;
+				for(gHj = 0; gHj < Hj->quotient.num_cosets; ++gHj){
+					if(i == j){
+						printf("%u ", Hj->quotient.coset_ids[g] == gHj);
+					}else{
+						printf("%u ", 0);
+					}
+				}
+			}
+			printf("\n");
 		}
-		for(i = 0; i < H2->quotient.num_cosets; ++i){
-			printf("%u ", 0);
-		}
-		printf("\n");
 	}
-	// Print the rows corresponding to non-invertible objects.
-	for(g = 0; g < G->order; ++g){
-		size_t i;
-		for(i = 0; i < H1->quotient.num_cosets; ++i){
-			printf("%u ", a[H1->quotient.coset_ids[
-				G->multiply[G->inverse[H1->quotient.cosets[i][0]]][g]
-			]]);
+	{
+		const size_t Hi_id = M->H_ids[i];
+		size_t gQ_coset;
+		// Print the rows corresponding to non-invertible objects.
+		for(gQ_coset = 0; gQ_coset < R->Q->quotient.num_cosets; ++gQ_coset){
+			const group_elem_id gQ = R->Q->quotient.cosets[gQ_coset][0];
+			size_t j;
+			for(j = 0; j < M->num_orbits; ++j){
+				const size_t Hj_id = M->H_ids[j];
+				const subgroup *const Hj = &R->G.subgroups[Hj_id];
+				const subgroup *const psi_Hij =
+					&R->G.subgroups[R->psi_ids[Hi_id][Hj_id]];
+
+				size_t gHj_coset;
+				for(gHj_coset = 0; gHj_coset < Hj->quotient.num_cosets; ++gHj_coset){
+					const group_elem_id gHj = Hj->quotient.cosets[gHj_coset][0];
+					printf("%u ", M->a[i][j][psi_Hij->quotient.coset_ids[
+						R->G.multiply[R->G.inverse[gHj]][gQ]
+					]]);
+				}
+			}
+			printf("\n");
 		}
-		for(i = 0; i < H2->quotient.num_cosets; ++i){
-			printf("%u ", x[H2->quotient.coset_ids[
-				G->multiply[G->inverse[g]][H2->quotient.cosets[i][0]]
-			]]);
-		}
-		printf("\n");
 	}
-	#endif
 }

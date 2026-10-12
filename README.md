@@ -7,6 +7,8 @@ $$g \otimes X\_Q = X\_{gQ}, \quad X\_Q \otimes g = X\_{\psi(gQ)}, \quad X \otime
 
 The duals are given by $X\_{gQ}^{\*} = X\_{r(Q)\psi(g^{-1}Q)}$. These rings show up everywhere in the theory of fusion categories, with famous examples being decategorifications of near-group ($Q = G$) and Haagerup-Izumi ($Q = 𝟙$, $\psi(g) = g^{-1}$, $m_g = 1$) fusion categories. They also show up as crossed products of the latter family, which was the original inspiration for this program.
 
+The assumption that $G$ is finite Abelian is probably not going anywhere for now, but the program is mostly written to avoid the assumption that the dimension of the non-invertibles are irrational. The only part that depends on this is solving systems of linear Diophantine equations: I just haven't had the time to write a brute force solver for this!
+
 
 ## Usage
 This program accepts one or more ring files as input,
@@ -43,6 +45,4 @@ The order of these cyclic factors is determined by the order of declaration in t
 
 ## Output
 
-Since we assume the non-invertible generators have irrational Frobenius-Perron dimension, a module over these rings has exactly two orbits of generators under the action of $G$. For each module, we compute the fusion matrices for a single member of each orbit. Let $M$ be a generator of the module and $F_M$ its action matrix (as output by the program). Then $(F_M)_{i,j}$ is the multiplicity of the $j$-th generator of the module in the product of $M$ with the $i$-th generator of the ring.
-
-Despite computing the fusion matrices internally, we currently only output the corresponding algebra objects in the fusion category. I'll probably get around to updating this soon.
+Since we assume the non-invertible generators have irrational Frobenius-Perron dimension, a module over these rings has exactly two orbits of generators under the action of $G$. For each module, we print the fusion matrices for a single member of each orbit. Let $M$ be a generator of the module and $F_M$ its action matrix (as output by the program). Then $(F_M)_{i,j}$ is the multiplicity of the $j$-th generator of the module in the product of $M$ with the $i$-th generator of the ring.

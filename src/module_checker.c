@@ -952,6 +952,7 @@ static int construct_modules(module_checker *const mc){
 				// If everything was satisfied, we've found a new module!
 				if(check_module_matrix(mc) && check_module_associativity(mc)){
 					quadratic_module M;
+					puts("Found module!");
 					if(!quadratic_module_init(
 						&M, mc->R, mc->H_ids.values, mc->a, mc->num_orbits
 					)){
@@ -960,28 +961,6 @@ static int construct_modules(module_checker *const mc){
 					}
 					quadratic_module_print(&M, mc->R);
 					quadratic_module_delete(&M);
-					puts("Found module!");
-					{
-						size_t i;
-						for(i = 0; i < mc->num_orbits; ++i){
-							size_t j;
-							const size_t Hi_id = mc->H_ids.values[i];
-							const subgroup *const psi_Hii = &mc->R->G.subgroups[
-								mc->R->psi_ids[Hi_id][Hi_id]
-							];
-
-							printf("\tH_%u + {%u", Hi_id, mc->a[i][i][0]);
-
-							for(j = 1; j < mc->R->Q->quotient.num_cosets; ++j){
-								printf(", %u", mc->a[i][i][
-									psi_Hii->quotient.coset_ids[
-										mc->R->Q->quotient.cosets[j][0]
-									]
-								]);
-							}
-							printf("}X\n");
-						}
-					}
 				}
 			} while(next_offdiag_mults(mc));
 		} while(partition_array_next(&mc->offdiag_sums));
