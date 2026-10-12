@@ -3,7 +3,7 @@ This program looks for special modules (so-called "NIM-reps") over quadratic fus
 
 Given the data described above, we obtain a quadratic fusion ring $R$ with generators $\\{g\\}\_{g \in G} \sqcup \\{X\_{gQ}\\}\_{gQ \in G/Q}$ and fusion rules
 
-$$g \otimes X\_Q = X\_{gQ}, \quad X\_Q \otimes g = X\_{\psi(gQ)}, \quad X \otimes X = \bigoplus\_{q \in Q}{q} \oplus \bigoplus\_{gQ \in G/Q}{X\_{gQ}^{m\_{gQ}}}.$$
+$$g \otimes X\_Q = X\_{gQ}, \quad X\_Q \otimes g = X\_{\psi(gQ)}, \quad X \otimes X = \bigoplus\_{q \in Q}{q} \oplus \bigoplus\_{gQ \in G/Q}{X\_{gQ}^{\oplus m\_{gQ}}}.$$
 
 The duals are given by $X\_{gQ}^{\*} = X\_{r(Q)\psi(g^{-1}Q)}$. These rings show up everywhere in the theory of fusion categories, with famous examples being decategorifications of near-group ($Q = G$) and Haagerup-Izumi ($Q = 𝟙$, $\psi(g) = g^{-1}$, $m_g = 1$) fusion categories. They also show up as crossed products of the latter family, which was the original inspiration for this program.
 
