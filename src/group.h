@@ -18,6 +18,7 @@ typedef size_t group_elem_id;
 typedef struct quotient_group {
 	// For each coset, store the indices of
 	// the group elements that live in it.
+	// These are stored in increasing order.
 	group_elem_id **cosets;
 	size_t num_cosets;
 	// For each group element, store the
@@ -26,6 +27,8 @@ typedef struct quotient_group {
 } quotient_group;
 
 typedef struct subgroup {
+	// We store elements of subgroups in
+	// increasing order of their indices.
 	group_elem_id *elem_ids;
 	size_t order;
 	quotient_group quotient;
@@ -54,6 +57,11 @@ typedef struct group {
 	group_elem_id *inverse;
 
 	subgroup *subgroups;
+	// The element product_ids[i][j] is the index of
+	// the product subgroup subgroups[i]subgroups[j].
+	// This matrix is symmetric so we're storing some
+	// things twice, but it just makes life easier.
+	size_t **product_ids;
 	size_t num_subgroups;
 } group;
 
@@ -83,6 +91,16 @@ void subgroup_init_direct_sum(
 	const subgroup *const H1, const subgroup *const H2
 );
 #endif
+size_t subgroup_find_id(
+	const group *const G,
+	group_elem_id *const elems,
+	const size_t num_elems
+);
+size_t subgroup_product_id(
+	const group *const G,
+	subgroup *const H1, subgroup *const H2
+);
+void subgroup_delete(subgroup *const H);
 
 int pgroup_load(pgroup *const Gp, FILE *const fp);
 void pgroup_delete(pgroup *const Gp);
@@ -92,6 +110,10 @@ int group_load(group *const G, FILE *const fp);
 size_t group_count_subgroups(const group *const G);
 void group_compute_subgroups(group *const G);
 #endif
+size_t group_subsets_intersection(
+	const group_elem_id *const S1, const size_t n1,
+	const group_elem_id *const S2, const size_t n2
+);
 void group_delete(group *const G);
 
 

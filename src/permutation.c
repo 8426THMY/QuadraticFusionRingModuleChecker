@@ -97,8 +97,52 @@ int permutation_next(permutation *const perm){
 	return 1;
 }
 
+// Reset a permutation to the first one in ascending order.
+// This assumes that we're currently on the last permutation.
+void permutation_restart(permutation *const perm){
+	if(perm->length > 0){
+		const size_t last = perm->length - 1;
+		const size_t midpoint = last/2;
+
+		size_t i;
+		// If we're on the last permutation, we can return
+		// to the first by simply reversing the values array.
+		for(i = 0; i < midpoint; ++i){
+			const integer_t temp = perm->values[i];
+			perm->values[i] = perm->values[last-i];
+			perm->values[last-i] = temp;
+		}
+	}
+}
+
+void permutation_print(const permutation *const perm){
+	if(perm->length > 0){
+		size_t i;
+
+		printf("(%u", perm->values[0]);
+		for(i = 1; i < perm->length; ++i){
+			printf(", %u", perm->values[i]);
+		}
+		printf(")\n");
+	}
+}
+
 void permutation_free(permutation *const perm){
 	free(perm->values);
+}
+
+
+// Iteratively visit every possible set of permutations in the array.
+int permutation_array_next(permutation_array *const perm_array){
+	size_t i;
+	for(i = 0; i < perm_array->num_perms - 1; ++i){
+		if(permutation_next(&perm_array->perms[i])){
+			return 1;
+		}else{
+			permutation_restart(&perm_array->perms[i]);
+		}
+	}
+	return permutation_next(&perm_array->perms[perm_array->num_perms - 1]);
 }
 
 

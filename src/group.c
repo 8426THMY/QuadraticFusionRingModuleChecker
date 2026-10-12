@@ -5,6 +5,8 @@
 #include <string.h>
 
 
+
+static int group_elem_id_compare(const void *g, const void *h);
 static int init_group_lookups(group *const G);
 
 
@@ -60,7 +62,7 @@ group_elem_id group_elem_invert(
 	const group_elem g
 ){
 
-	group_elem_id g_id = 0;
+	group_elem_id inv_id = 0;
 	size_t offset = 1;
 
 	size_t i;
@@ -68,12 +70,12 @@ group_elem_id group_elem_invert(
 		const pgroup *const Gp = &G->pgroups[i];
 		size_t j;
 		for(j = 0; j < Gp->num_powers; ++j){
-			g_id += g[i][j]*offset;
+			inv_id += ((Gp->powers[j] - g[i][j]) % Gp->powers[j])*offset;
 			offset *= Gp->powers[j];
 		}
 	}
 
-	return g_id;
+	return inv_id;
 }
 
 void group_elem_print(const group *const G, const group_elem g){
@@ -218,6 +220,92 @@ void subgroup_init_direct_sum(
 }
 #endif
 
+// Find the ID of the subgroup with the elements specified.
+// Note that the array of elements may contain duplicates,
+// so this function will sort it and remove any.
+size_t subgroup_find_id(
+	const group *const G,
+	group_elem_id *const elems,
+	const size_t num_elems
+){
+
+	size_t i;
+	size_t order;
+
+	// Our subgroups store element IDs in sorted order,
+	// so this just makes it a bit easier to find it.
+	qsort(
+		elems, num_elems,
+		sizeof(*elems), group_elem_id_compare
+	);
+	order = 1;
+	// Remove the duplicate element IDs. We skip the
+	// first one, since it's always the identity.
+	for(i = 1; i < num_elems; ++i){
+		if(elems[i] != elems[i-1]){
+			elems[order] = elems[i];
+			++order;
+		}
+	}
+
+	// Search for H_1 H_2 in the list of subgroups.
+	for(i = 0; i < G->num_subgroups; ++i){
+		const subgroup *const H = &G->subgroups[i];
+		// If H has the same order and element IDs as
+		// H_1 H_2, we've found our subgroup product!
+		if(
+			H->order == order &&
+			memcmp(H->elem_ids, elems, order*sizeof(*elems)) == 0
+		){
+
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+// Return the index of the product subgroup H_1 H_2.
+size_t subgroup_product_id(
+	const group *const G,
+	subgroup *const H1, subgroup *const H2
+){
+
+	size_t i;
+	size_t H1H2_id;
+	group_elem_id *H1H2_elems = malloc(
+		H1->order*H2->order*sizeof(*H1H2_elems)
+	);
+	if(H1H2_elems == NULL){
+		puts("Failed to allocate memory for group product!");
+		return -1;
+	}
+
+	// Compute every element ID for the subgroup product.
+	// This may generate duplicate elements, but that's okay!
+	for(i = 0; i < H1->order; ++i){
+		size_t j;
+		for(j = 0; j < H2->order; ++j){
+			H1H2_elems[i*H2->order + j] =
+				G->multiply[H1->elem_ids[i]][H2->elem_ids[j]];
+		}
+	}
+
+	// Find the ID of the subgroup with these elements.
+	H1H2_id = subgroup_find_id(G, H1H2_elems, H1->order*H2->order);
+	if(H1H2_id == -1){
+		puts("Unable to find product of subgroups!");
+	}
+	free(H1H2_elems);
+
+	return H1H2_id;
+}
+
+void subgroup_delete(subgroup *const H){
+	free(H->elem_ids);
+	free(H->quotient.cosets);
+}
+
 
 // A p-group is specified in the following format:
 //     prime num_powers power1 power2 ... powern
@@ -274,6 +362,7 @@ int group_load(group *const G, FILE *const fp){
 	G->multiply = NULL;
 	G->inverse = NULL;
 	G->subgroups = NULL;
+	G->product_ids = NULL;
 	G->num_subgroups = 0;
 
 
@@ -348,6 +437,40 @@ int group_load(group *const G, FILE *const fp){
 			free(H->elem_ids);
 			G->num_subgroups = i;
 			return 0;
+		}
+	}
+
+	G->product_ids = malloc(
+		G->num_subgroups*(sizeof(*G->product_ids) +
+		G->num_subgroups*sizeof(**G->product_ids))
+	);
+	if(G->product_ids == NULL){
+		puts("Failed to allocate memory for subgroup product indices!");
+		return 0;
+	}
+
+	{
+		size_t *cur_offset = (size_t *)&G->product_ids[G->num_subgroups];
+		// Initialize the row pointers.
+		for(i = 0; i < G->num_subgroups; ++i){
+			G->product_ids[i] = cur_offset;
+			cur_offset += G->num_subgroups;
+		}
+	}
+	// Initialize the array of subgroup product indices.
+	for(i = 0; i < G->num_subgroups; ++i){
+		size_t j;
+		for(j = i; j < G->num_subgroups; ++j){
+			const size_t prod_id = subgroup_product_id(
+				G, &G->subgroups[i], &G->subgroups[j]
+			);
+			if(prod_id == -1){
+				free(G->product_ids);
+				G->product_ids = NULL;
+				return 0;
+			}
+			G->product_ids[i][j] = prod_id;
+			G->product_ids[j][i] = prod_id;
 		}
 	}
 
@@ -431,15 +554,70 @@ void group_compute_subgroups(group *const G){
 }
 #endif
 
+// Return the number of group elements in both S_1
+// and S_2. We assume that both subsets are sorted.
+size_t group_subsets_intersection(
+	const group_elem_id *const S1, const size_t n1,
+	const group_elem_id *const S2, const size_t n2
+){
+
+	size_t order = 0;
+
+	size_t i = 0;
+	size_t j = 0;
+	// We iterate over both arrays simultaneously
+	// looking for elements that they have in common.
+	for(;;){
+		// If the current ID in S_1 is less than the
+		// one in S_2, we should increment S_1's index.
+		if(S1[i] < S2[j]){
+			++i;
+			// If this was the last element of S_1, we
+			// can't find any more matches, so we're done!
+			if(i == n1){
+				break;
+			}
+		}else if(S2[j] < S1[i]){
+			++j;
+			if(j == n2){
+				break;
+			}
+
+		// If the IDs in S_1 and S_2 match,
+		// they must share a group element.
+		}else{
+			++i;
+			++j;
+			++order;
+			if(i == n1 || j == n2){
+				break;
+			}
+		}
+	}
+
+	return order;
+}
+
 void group_delete(group *const G){
 	size_t i;
 	for(i = 0; i < G->num_pgroups; ++i){
 		pgroup_delete(&G->pgroups[i]);
 	}
 	free(G->pgroups);
+
 	free(G->elems);
+
+	for(i = 0; i < G->num_subgroups; ++i){
+		subgroup_delete(&G->subgroups[i]);
+	}
+	free(G->subgroups);
+	free(G->product_ids);
 }
 
+
+static int group_elem_id_compare(const void *g, const void *h){
+	return (*(group_elem_id *)g - *(group_elem_id *)h);
+}
 
 static int init_group_lookups(group *const G){
 	group_elem_id i;

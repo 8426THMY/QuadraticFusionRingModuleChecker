@@ -7,6 +7,10 @@ typedef double number_t;
 
 
 integer_t gcd(integer_t a, integer_t b);
+integer_t xgcd(
+	integer_t a, integer_t b,
+	integer_t *const x, integer_t *const y
+);
 integer_t powi(const integer_t a, const integer_t p);
 
 

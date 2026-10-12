@@ -12,6 +12,11 @@ typedef struct permutation {
 	size_t length;
 } permutation;
 
+typedef struct permutation_array {
+	permutation *perms;
+	size_t num_perms;
+} permutation_array;
+
 
 int permutation_init(
 	permutation *const perm, const size_t length,
@@ -22,7 +27,11 @@ void permutation_start(
 	const integer_t *const input, const size_t input_length
 );
 int permutation_next(permutation *const perm);
+void permutation_restart(permutation *const perm);
+void permutation_print(const permutation *const perm);
 void permutation_free(permutation *const perm);
+
+int permutation_array_next(permutation_array *const perm_array);
 
 
 #endif

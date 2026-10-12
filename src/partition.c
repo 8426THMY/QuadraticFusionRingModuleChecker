@@ -43,12 +43,12 @@ void partition_start(
 	if(max_length == 0){
 		p->length = 0;
 	}else{
-		memset(p->parts, 0, max_length*sizeof(*p->parts));
-
 		if(max_length == 1){
 			p->parts[0] = n;
 			p->length = 1;
 		}else{
+			memset(p->parts, 0, max_length*sizeof(*p->parts));
+
 			p->parts[1] = n;
 			p->length = 2;
 			partition_next(p);
@@ -77,6 +77,49 @@ int partition_next(partition *const p){
 	return 0;
 }
 
+// Reset a partition to the first one in ascending order.
+void partition_restart(partition *const p){
+	if(p->max_length > 1){
+		integer_t n = 0;
+		size_t i;
+		for(i = 0; i < p->length; ++i){
+			n += p->parts[i];
+		}
+
+		memset(p->parts, 0, p->max_length*sizeof(*p->parts));
+
+		p->parts[1] = n;
+		p->length = 2;
+		partition_next(p);
+	}
+}
+
+void partition_print(const partition *const p){
+	if(p->length > 0){
+		size_t i;
+
+		printf("(%u", p->parts[0]);
+		for(i = 1; i < p->length; ++i){
+			printf(", %u", p->parts[i]);
+		}
+		printf(")\n");
+	}
+}
+
 void partition_free(partition *const p){
 	free(p->parts);
+}
+
+
+// Iteratively visit every possible set of partitions in the array.
+int partition_array_next(partition_array *const part_array){
+	size_t i;
+	for(i = 0; i < part_array->num_parts - 1; ++i){
+		if(partition_next(&part_array->parts[i])){
+			return 1;
+		}else{
+			partition_restart(&part_array->parts[i]);
+		}
+	}
+	return partition_next(&part_array->parts[part_array->num_parts - 1]);
 }
