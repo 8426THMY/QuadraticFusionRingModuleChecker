@@ -36,7 +36,7 @@ m_g1 ... m_gk
 
 Here, a p-group is specified by a prime, the number of cyclic factors and the prime powers of each factor. That is, `prime num_factors power1 ... powern`.
 
-Currently, the program does not compute the subgroups of $G$ by itself, so they have to be specified manually. A subgroup is specified by its order followed by the indices of its elements, so `order g1_id ... gn_id`. For $G = \mathbb{Z}/p_1^{e_1}\mathbb{Z} \times \dots \times \mathbb{Z}/p_n^{e_n}\mathbb{Z}$, the index $g_{\textnormal{id}}$ of the group element $g = (g_1, \dots, g_n)$ is
+Currently, the program does not compute the subgroups of $G$ by itself, so they have to be specified manually. A subgroup is specified by its order followed by the indices of its elements in increasing order, so `order g1_id ... gn_id`. For $G = \mathbb{Z}/p_1^{e_1}\mathbb{Z} \times \dots \times \mathbb{Z}/p_n^{e_n}\mathbb{Z}$, the index $g_{\textnormal{id}}$ of the group element $g = (g_1, \dots, g_n)$ is
 
 $$g_{\textnormal{id}} = \sum_{i=1}^{n}{g_i\prod_{j=1}^{i-1}{p_j^{e_j}}}.$$
 
