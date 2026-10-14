@@ -44,9 +44,11 @@ int linear_diophantine_start(linear_diophantine *const dio){
 			//     x[1] = x'[1] - (a[0]/gcd(a[0], a[1]))t,
 			// for some integer t. We'll just return the
 			// non-negative solution that minimizes x[0].
-			// We subtract from x[0] here to avoid integer
-			// division rounding issues.
-			t = (dio->x[0]*dio->g)/dio->a[0][1];
+			// If x[0] is negative, we need to do some
+			// tricks to make sure this still rounds down.
+			t = (dio->x[0] >= 0) ?
+				(dio->x[0]*dio->g)/dio->a[0][1] :
+				(dio->x[0]*dio->g - (dio->a[0][1] - 1))/dio->a[0][1];
 			dio->x[0] -= (dio->a[0][1]/dio->g)*t;
 			dio->x[1] += (dio->a[0][0]/dio->g)*t;
 
